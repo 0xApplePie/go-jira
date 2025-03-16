@@ -2,15 +2,15 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    build:
+      context: ./backend
     ports:
       - '8080:8080'
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/jira?sslmode=disable
     depends_on:
-      - db
-    volumes:
-      - .:/app
+      db:
+        condition: service_healthy
     networks:
       - jira-network
 
@@ -24,6 +24,11 @@ services:
       - POSTGRES_DB=jira
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - jira-network
 
