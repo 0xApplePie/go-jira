@@ -9,5 +9,6 @@ type TicketStore interface {
 	Get(id string) (*models.Ticket, error)
 	List() ([]*models.Ticket, error)
 	Update(ticket *models.Ticket) error
+	Delete(id string) (bool, error)
 	Save() error
 } 

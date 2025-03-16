@@ -172,4 +172,20 @@ func (s *PostgresStore) Save() error {
 
 func (s *PostgresStore) Close() error {
     return s.db.Close()
+}
+
+func (s *PostgresStore) Delete(id string) (bool, error) {
+    query := `DELETE FROM tickets WHERE id = $1`
+    
+    result, err := s.db.Exec(query, id)
+    if err != nil {
+        return false, err
+    }
+    
+    rowsAffected, err := result.RowsAffected()
+    if err != nil {
+        return false, err
+    }
+    
+    return rowsAffected > 0, nil
 } 
