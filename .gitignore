@@ -6,3 +6,5 @@ jira
 *.bak
 *.swp
 *.swo
+
+.env
