@@ -1,0 +1,8 @@
+jira
+*.exe
+*.out
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
