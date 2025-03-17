@@ -1,102 +1,48 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('Ticket System', () => {
-  let tickets = []
+  test('should create and delete a ticket', async ({ page }) => {
+    // Navigate to the app
+    await page.goto('/')
 
-  test.beforeEach(async ({ page }) => {
-    tickets = [] // Reset tickets state for each test
+    // Debug: Log what we see on the page
+    console.log('Current URL:', page.url())
 
-    // Mock GraphQL responses
-    await page.route('**/graphql', async (route) => {
-      const request = route.request()
-      const postData = JSON.parse(request.postData() || '{}')
+    // Create a ticket with more explicit waiting
+    const titleInput = await page.waitForSelector('input[type="text"]')
+    await titleInput.type('Integration Test Ticket')
 
-      if (postData.query.includes('createTicket')) {
-        const newTicket = {
-          id: 'test-123',
-          title: 'Test Ticket',
-          description: 'Test Description',
-          status: 'TODO',
-          assignee: 'Test User',
-        }
-        tickets.push(newTicket)
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            data: { createTicket: newTicket },
-          }),
-        })
-      } else if (postData.query.includes('deleteTicket')) {
-        tickets = [] // Clear tickets after delete
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            data: { deleteTicket: true },
-          }),
-        })
-      } else {
-        // Query for tickets list
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            data: { tickets },
-          }),
-        })
-      }
+    const descriptionInput = await page.waitForSelector('textarea')
+    await descriptionInput.type('Testing with real backend')
+
+    const assigneeInput = await page.waitForSelector(
+      'input[type="text"]:nth-of-type(2)'
+    )
+    await assigneeInput.type('Tester')
+
+    // Find and click the create button
+    const createButton = await page.waitForSelector(
+      'button:has-text("Create Ticket")'
+    )
+    await createButton.click()
+
+    // Wait for the new ticket to appear
+    const ticketTitle = await page.waitForSelector(
+      'text=Integration Test Ticket'
+    )
+    await expect(ticketTitle).toBeVisible()
+
+    // Set up dialog handler BEFORE finding the delete button
+    page.once('dialog', async (dialog) => {
+      console.log('Dialog appeared:', dialog.message())
+      await dialog.accept()
     })
 
-    await page.goto('http://localhost:3000')
-    // Wait for initial page load
-    await page.waitForSelector('form')
-  })
+    // Find and click the delete button with more explicit waiting
+    const deleteButton = await page.waitForSelector('button:has-text("Delete")')
+    await deleteButton.click()
 
-  test('should create and display a new ticket', async ({ page }) => {
-    // Fill in the create ticket form
-    await page.fill('input[placeholder="Title"]', 'Test Ticket')
-    await page.fill('textarea[placeholder="Description"]', 'Test Description')
-    await page.fill('input[placeholder="Assignee"]', 'Test User')
-
-    // Submit the form
-    await page.click('button:text("Create Ticket")')
-
-    // Wait for the network request to complete
-    await page.waitForResponse(
-      (response) =>
-        response.url().includes('/graphql') &&
-        response.request().postData()?.includes('createTicket')
-    )
-
-    // Wait for and verify the new ticket appears
-    await expect(page.getByText('Test Ticket')).toBeVisible()
-  })
-
-  test('should delete a ticket', async ({ page }) => {
-    // Create a ticket first
-    await page.fill('input[placeholder="Title"]', 'Test Ticket')
-    await page.fill('textarea[placeholder="Description"]', 'Test Description')
-    await page.fill('input[placeholder="Assignee"]', 'Test User')
-    await page.click('button:text("Create Ticket")')
-
-    // Wait for the ticket to appear
-    await expect(page.getByText('Test Ticket')).toBeVisible()
-
-    // Set up dialog handler before clicking delete
-    page.on('dialog', (dialog) => dialog.accept())
-
-    // Click delete button
-    await page.click('button:text("Delete")')
-
-    // Wait for the delete request to complete
-    await page.waitForResponse(
-      (response) =>
-        response.url().includes('/graphql') &&
-        response.request().postData()?.includes('deleteTicket')
-    )
-
-    // Verify the ticket is no longer visible
-    await expect(page.getByText('Test Ticket')).not.toBeVisible()
+    // Wait for the ticket to be removed
+    await expect(page.locator('text=Integration Test Ticket')).not.toBeVisible()
   })
 })

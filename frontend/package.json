@@ -13,7 +13,9 @@
     "test:coverage": "jest --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:debug": "playwright test --debug"
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:full": "PLAYWRIGHT_TEST_BASE_URL=http://localhost:3000 playwright test",
+    "test:e2e:debug:full": "PLAYWRIGHT_TEST_BASE_URL=http://localhost:3000 playwright test --debug"
   },
   "dependencies": {
     "@apollo/client": "^3.13.4",
