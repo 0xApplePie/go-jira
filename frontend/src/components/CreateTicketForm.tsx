@@ -46,6 +46,7 @@ export default function CreateTicketForm() {
             type='text'
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            placeholder='Title'
             className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500'
             required
           />
@@ -57,6 +58,7 @@ export default function CreateTicketForm() {
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            placeholder='Description'
             className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500'
             rows={3}
             required
@@ -70,6 +72,7 @@ export default function CreateTicketForm() {
             type='text'
             value={assignee}
             onChange={(e) => setAssignee(e.target.value)}
+            placeholder='Assignee'
             className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500'
           />
         </div>
