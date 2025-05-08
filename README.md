@@ -1,0 +1,1 @@
+Jira like Fullstack App with a Go Backend Typescript NextJS Frontend and a PostgresDB
